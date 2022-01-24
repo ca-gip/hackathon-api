@@ -1,0 +1,80 @@
+package services
+
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"io/ioutil"
+	"log"
+	"time"
+
+	"hackathon-api/configs"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/gridfs"
+)
+
+var donationFSCollection *mongo.Collection = configs.GetCollection(configs.DB, "fs.files")
+var conn = configs.ConnectDB()
+var db = conn.Database("donationFiles")
+
+func UploadFile(file, filename string) error {
+
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bucket, err := gridfs.NewBucket(
+		db,
+	)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	uploadStream, err := bucket.OpenUploadStream(
+		filename,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer uploadStream.Close()
+
+	fileSize, err := uploadStream.Write(data)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Printf("Write file to DB was successful. File size: %d M\n", fileSize)
+	return nil
+}
+
+func DownloadFile(fileName string) ([]byte, error) {
+
+	// CRUD operation
+	fsFiles := db.Collection("fs.files")
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	var results bson.M
+	err := fsFiles.FindOne(ctx, bson.M{}).Decode(&results)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	// you can print out the results
+	fmt.Println(results)
+
+	bucket, _ := gridfs.NewBucket(
+		db,
+	)
+	var buf bytes.Buffer
+	dStream, err := bucket.DownloadToStreamByName(fileName, &buf)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	fmt.Printf("File size to download: %v\n", dStream)
+	return buf.Bytes(), nil
+}
