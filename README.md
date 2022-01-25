@@ -17,3 +17,18 @@ You need to set Mongo URI env var
 ```bash
  export MONGOURI="mongodb://127.0.0.1:27017/myFirstDatabese?retryWrites=true&w=majority"
 ```
+
+Install dependencies for pdf generation
+
+```bash
+ apt-get install xvfb libfontconfig wkhtmltopdf
+```
+
+Launch application
+
+```bash
+ go mod tidy
+ go run main.go
+```
+
+TODO Dockerfile
