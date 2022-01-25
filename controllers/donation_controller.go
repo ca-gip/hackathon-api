@@ -72,13 +72,13 @@ func CreateDonation() gin.HandlerFunc {
 func GetADonation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		userId := c.Param("id")
+		donationId := c.Param("donationId")
 		var donation models.Donation
 		defer cancel()
 
-		objId, _ := primitive.ObjectIDFromHex(userId)
+		objId, _ := primitive.ObjectIDFromHex(donationId)
 
-		err := donationCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&donation)
+		err := donationCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&donation)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
