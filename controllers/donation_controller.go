@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"hackathon-api/configs"
 	"hackathon-api/models"
 	"hackathon-api/responses"
@@ -9,6 +11,7 @@ import (
 	"net/http"
 	"time"
 
+	pdfgen "github.com/ca-gip/hackathon-reward/pkg/generator"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,8 +47,17 @@ func CreateDonation() gin.HandlerFunc {
 			MoneyType: donation.MoneyType,
 		}
 
-		services.UploadFile([]byte("Here is a string...."), "TODO.pdf")
-		newDonation.PDFRef = "TODO"
+		hash := uuid.New().String()
+		pdfname := fmt.Sprintf("%s.pdf", hash)
+
+		pdffile, err := pdfgen.GeneratePerfectDocument(donation.DonorName, donation.Amount, hash)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		services.UploadFile(pdffile, pdfname)
+		newDonation.PDFRef = pdfname
 
 		result, err := donationCollection.InsertOne(ctx, newDonation)
 		if err != nil {
@@ -72,6 +84,15 @@ func GetADonation() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
+
+		pdfFile, err := services.DownloadFile("TODO.pdf")
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		donation.PDFfile = pdfFile
 
 		c.JSON(http.StatusOK, responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": donation}})
 	}

@@ -1,9 +1,19 @@
-# hackathon-api
+# Hackathon-Api
 
-Build a REST API with Golang and MongoDB - Gin-gonic Version
+### A REST Api to donate all your extra Cryptocurrency for to the banking cause
 
-This repository shows the source code for building a user management application with Golang using the Gin-gonic framework and MongoDB.
+This repository shows the source code for building application with Golang using the Gin-gonic framework and MongoDB.
 
-Article Link
+## Prerequisites
 
-[Article Link](https://dev.to/hackmamba/build-a-rest-api-with-golang-and-mongodb-gin-gonic-version-269m)
+First you need a MongoDB database, here an example with Docker
+
+```bash
+ docker run -p 27017:27017 --name some-mongo -d mongo
+```
+
+You need to set Mongo URI env var 
+
+```bash
+ export MONGOURI="mongodb://127.0.0.1:27017/myFirstDatabese?retryWrites=true&w=majority"
+```
