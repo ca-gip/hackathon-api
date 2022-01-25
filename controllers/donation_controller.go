@@ -44,7 +44,7 @@ func CreateDonation() gin.HandlerFunc {
 			MoneyType: donation.MoneyType,
 		}
 
-		services.UploadFile("TODO", "TODO")
+		services.UploadFile([]byte("Here is a string...."), "TODO.pdf")
 		newDonation.PDFRef = "TODO"
 
 		result, err := donationCollection.InsertOne(ctx, newDonation)
@@ -98,7 +98,7 @@ func EditADonation() gin.HandlerFunc {
 			return
 		}
 
-		update := bson.M{"donatorName": donation.DonorName, "amount": donation.Amount, "moneyType": donation.MoneyType, }
+		update := bson.M{"donatorName": donation.DonorName, "amount": donation.Amount, "moneyType": donation.MoneyType}
 
 		result, err := donationCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 

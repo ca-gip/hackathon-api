@@ -5,25 +5,19 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
-	"io/ioutil"
 	"log"
 	"time"
 
-	"hackathon-api/configs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
+	"hackathon-api/configs"
 )
 
 var donationFSCollection *mongo.Collection = configs.GetCollection(configs.DB, "fs.files")
 var conn = configs.ConnectDB()
 var db = conn.Database("donationFiles")
 
-func UploadFile(file, filename string) error {
-
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
+func UploadFile(file []byte, filename string) error {
 
 	bucket, err := gridfs.NewBucket(
 		db,
@@ -41,7 +35,7 @@ func UploadFile(file, filename string) error {
 	}
 	defer uploadStream.Close()
 
-	fileSize, err := uploadStream.Write(data)
+	fileSize, err := uploadStream.Write(file)
 	if err != nil {
 		log.Fatal(err)
 		return err
