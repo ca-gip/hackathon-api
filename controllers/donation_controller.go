@@ -85,7 +85,7 @@ func GetADonation() gin.HandlerFunc {
 			return
 		}
 
-		pdfFile, err := services.DownloadFile("TODO.pdf")
+		pdfFile, err := services.DownloadFile(donation.PDFRef)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
