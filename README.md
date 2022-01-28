@@ -15,7 +15,7 @@ First you need a MongoDB database, here an example with Docker
 You need to set Mongo URI env var 
 
 ```bash
- export MONGOURI="mongodb://127.0.0.1:27017/myFirstDatabese?retryWrites=true&w=majority"
+ export MONGOURI="mongodb://127.0.0.1:27017/donation?retryWrites=true&w=majority"
 ```
 
 Install dependencies for pdf generation
@@ -24,11 +24,51 @@ Install dependencies for pdf generation
  apt-get install xvfb libfontconfig wkhtmltopdf
 ```
 
-Launch application
+Launching application
 
 ```bash
  go mod tidy
  go run main.go
 ```
 
-TODO Dockerfile
+### To build the docker image
+
+You need to change the repositories address in Makefile ``` DOCKER_REPO= your_repo ```
+
+If you need to be authenticated use ``` docker login ``` command with your credentials
+
+```bash
+ make build
+ make image
+```
+
+### Call API example
+
+To create a new donation
+
+```bash
+curl --request POST \
+    --url http://localhost:8080/donation \
+    --header 'Content-Type: application/json' \
+    --data '{
+    "donatorName": "Rob STRACK",
+    "amount": 125,
+    "moneyType": "€"
+    }'
+```
+
+To get a donation
+
+```bash
+curl --request GET \
+    --url 'http://localhost:8080/donation/DONATION_ID?=' \
+    --header 'Content-Type: application/json'
+```
+
+To get all donation
+
+```bash
+curl --request GET \
+    --url 'http://localhost:8080/donations?=' \
+    --header 'Content-Type: application/json'
+```
