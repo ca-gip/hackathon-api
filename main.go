@@ -25,6 +25,7 @@ func main() {
 
 	//routes
 	routes.DonationRoute(router)
+	routes.StatisticsRoute(router)
 
 	router.Run("0.0.0.0:8080")
 }
