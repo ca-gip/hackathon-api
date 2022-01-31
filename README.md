@@ -41,6 +41,17 @@ If you need to be authenticated use ``` docker login ``` command with your crede
  make image
 ```
 
+Run image
+
+```bash
+# On arm64
+docker run  --platform linux/arm64 -e "MONGOURI=mongodb://192.168.1.68:27017/donation?retryWrites=true&w=majority" -d --name hackathon cagip/hackathon-api:dev
+
+# On amd64
+docker run  --platform linux/amd64 -e "MONGOURI=mongodb://192.168.1.68:27017/donation?retryWrites=true&w=majority" -d --name hackathon cagip/hackathon-api:dev
+
+```
+
 ### Call API example
 
 To create a new donation
