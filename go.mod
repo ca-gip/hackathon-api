@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/ca-gip/hackathon-reward v0.0.0-20220125135933-0e63aef6abc6
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-stack/stack v1.8.1 // indirect
