@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"hackathon-api/configs"
 	"hackathon-api/models"
 	"hackathon-api/responses"
 	"hackathon-api/services"
+	"hackathon-api/utils"
 	"net/http"
+	"strconv"
 	"time"
 
 	pdfgen "github.com/ca-gip/hackathon-reward/pkg/generator"
@@ -40,6 +43,13 @@ func CreateDonation() gin.HandlerFunc {
 			return
 		}
 
+		// Validate MoneyType
+		if err := utils.ValidateMoneyType(donation.MoneyType); err != nil {
+			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		// Create a new Donation object
 		newDonation := models.Donation{
 			ID:        primitive.NewObjectID(),
 			DonorName: donation.DonorName,
@@ -50,13 +60,18 @@ func CreateDonation() gin.HandlerFunc {
 		hash := uuid.New().String()
 		pdfname := fmt.Sprintf("%s.pdf", hash)
 
+		// Generate a pdf document
 		pdffile, err := pdfgen.GeneratePerfectDocument(donation.DonorName, donation.Amount, hash)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
 
-		services.UploadFile(pdffile, pdfname)
+		err = services.UploadFile(pdffile, pdfname)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
 		newDonation.PDFRef = pdfname
 
 		result, err := donationCollection.InsertOne(ctx, newDonation)
@@ -98,60 +113,15 @@ func GetADonation() gin.HandlerFunc {
 	}
 }
 
-func EditADonation() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		userId := c.Param("userId")
-		var donation models.Donation
-		defer cancel()
-
-		objId, _ := primitive.ObjectIDFromHex(userId)
-
-		//validate the request body
-		if err := c.BindJSON(&donation); err != nil {
-			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
-			return
-		}
-
-		//use the validator library to validate required fields
-		if validationErr := validate.Struct(&donation); validationErr != nil {
-			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": validationErr.Error()}})
-			return
-		}
-
-		update := bson.M{"donatorName": donation.DonorName, "amount": donation.Amount, "moneyType": donation.MoneyType}
-
-		result, err := donationCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
-			return
-		}
-
-		//get updated Donation details
-		var updatedDonation models.Donation
-		if result.MatchedCount == 1 {
-			err := donationCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedDonation)
-
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
-				return
-			}
-		}
-
-		c.JSON(http.StatusOK, responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": updatedDonation}})
-	}
-}
-
 func DeleteADonation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		DonationId := c.Param("DonationId")
+		DonationId := c.Param("donationId")
 		defer cancel()
 
 		objId, _ := primitive.ObjectIDFromHex(DonationId)
 
-		result, err := donationCollection.DeleteOne(ctx, bson.M{"id": objId})
+		result, err := donationCollection.DeleteOne(ctx, bson.M{"_id": objId})
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
@@ -173,11 +143,27 @@ func DeleteADonation() gin.HandlerFunc {
 
 func GetAllDonations() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		limit := c.DefaultQuery("limit", "100")
+
+		findOptions := options.Find()
+
+		// Sort by `_id` field descending
+		findOptions.SetSort(bson.D{{"_id", -1}})
+
+		// Validate limit is int
+		if limitInt, err := strconv.Atoi(limit); err != nil {
+			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		} else {
+			// Limit number of document returned
+			findOptions.SetLimit(int64(limitInt))
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		var Donations []models.Donation
 		defer cancel()
 
-		results, err := donationCollection.Find(ctx, bson.M{})
+		results, err := donationCollection.Find(ctx, bson.M{}, findOptions)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
@@ -232,5 +218,13 @@ func DownloadDonation() gin.HandlerFunc {
 		c.Header("Content-Type", "application/octet-stream")
 		c.Data(http.StatusOK, "application/octet-stream", pdfFile)
 
+	}
+}
+
+func GetMoney() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK,
+			responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": models.GetMoney()}},
+		)
 	}
 }
