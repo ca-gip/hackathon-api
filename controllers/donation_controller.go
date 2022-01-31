@@ -50,7 +50,9 @@ func CreateDonation() gin.HandlerFunc {
 		hash := uuid.New().String()
 		pdfname := fmt.Sprintf("%s.pdf", hash)
 
-		pdffile, err := pdfgen.GeneratePerfectDocument(donation.DonorName, donation.Amount, hash)
+		
+
+		pdffile, err := pdfgen.GeneratePerfectDocument(donation.DonorName, donation.Amount, hash, donation.MoneyType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
