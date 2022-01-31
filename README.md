@@ -61,7 +61,7 @@ To get a donation
 
 ```bash
 curl --request GET \
-    --url 'http://localhost:8080/donation/DONATION_ID?=' \
+    --url 'http://localhost:8080/donation/<DONATION_ID>' \
     --header 'Content-Type: application/json'
 ```
 
@@ -69,6 +69,6 @@ To get all donation
 
 ```bash
 curl --request GET \
-    --url 'http://localhost:8080/donations?=' \
+    --url 'http://localhost:8080/donations' \
     --header 'Content-Type: application/json'
 ```
