@@ -38,7 +38,6 @@ You need to change the repositories address in Makefile ``` DOCKER_REPO= your_re
 If you need to be authenticated use ``` docker login ``` command with your credentials
 
 ```bash
- make build
  make image
 ```
 
