@@ -200,3 +200,37 @@ func GetAllDonations() gin.HandlerFunc {
 		)
 	}
 }
+
+func DownloadDonation() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		donationId := c.Param("donationId")
+		var donation models.Donation
+		defer cancel()
+
+		objId, _ := primitive.ObjectIDFromHex(donationId)
+
+		err := donationCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&donation)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		pdfFile, err := services.DownloadFile(donation.PDFRef)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		donation.PDFfile = pdfFile
+
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Transfer-Encoding", "binary")
+		c.Header("Content-Disposition", "attachment; filename=pdf")
+		c.Header("Content-Type", "application/octet-stream")
+		c.Data(http.StatusOK, "application/octet-stream", pdfFile)
+
+	}
+}

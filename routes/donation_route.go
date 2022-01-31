@@ -12,4 +12,5 @@ func DonationRoute(router *gin.Engine) {
 	router.PUT("/donation/:donationId", controllers.EditADonation())
 	router.DELETE("/donation/:donationId", controllers.DeleteADonation())
 	router.GET("/donations", controllers.GetAllDonations())
+	router.GET("/document/:donationId", controllers.DownloadDonation())
 }
