@@ -71,3 +71,8 @@ curl --request GET \
     --url 'http://localhost:8080/donations' \
     --header 'Content-Type: application/json'
 ```
+
+
+
+# Run on ARM
+docker run  --platform linux/arm64 -e "MONGOURI=mongodb://192.168.1.68:27017/donation?retryWrites=true&w=majority" -d --name hackathon cagip/hackathon-api:dev
