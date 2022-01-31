@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	pdfgen "github.com/ca-gip/hackathon-reward/pkg/generator"
+	"os/exec"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,14 +50,13 @@ func CreateDonation() gin.HandlerFunc {
 		hash := uuid.New().String()
 		pdfname := fmt.Sprintf("%s.pdf", hash)
 
-		
-
-		pdffile, err := pdfgen.GeneratePerfectDocument(donation.DonorName, donation.Amount, hash, donation.MoneyType)
+		args := []string{"create", "--output", "Bytes", "--donor", donation.DonorName, "--hash", hash, "--currency", donation.MoneyType, "--amount", fmt.Sprintf("%v", donation.Amount) }
+		pdffile, err := exec.Command("hackathon-reward", args... ).Output()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
-
+		fmt.Sprintf("PDF : %v", pdffile)
 		services.UploadFile(pdffile, pdfname)
 		newDonation.PDFRef = pdfname
 
