@@ -9,7 +9,8 @@ import (
 func DonationRoute(router *gin.Engine) {
 	router.POST("/donation", controllers.CreateDonation())
 	router.GET("/donation/:donationId", controllers.GetADonation())
-	router.PUT("/donation/:donationId", controllers.EditADonation())
 	router.DELETE("/donation/:donationId", controllers.DeleteADonation())
 	router.GET("/donations", controllers.GetAllDonations())
+	router.GET("/document/:donationId", controllers.DownloadDonation())
+	router.GET("/money", controllers.GetMoney())
 }
