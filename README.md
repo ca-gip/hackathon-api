@@ -45,10 +45,10 @@ Run image
 
 ```bash
 # On arm64
-docker run  --platform linux/arm64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -d --name hackathon cagip/hackathon-api:dev
+docker run  --platform linux/arm64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
 
 # On amd64
-docker run  --platform linux/amd64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -d --name hackathon cagip/hackathon-api:dev
+docker run  --platform linux/amd64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
 
 ```
 
