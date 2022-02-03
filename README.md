@@ -44,11 +44,11 @@ If you need to be authenticated use ``` docker login ``` command with your crede
 Run image
 
 ```bash
-# On arm64
-docker run  --platform linux/arm64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
+ # On arm64
+ docker run  --platform linux/arm64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
 
-# On amd64
-docker run  --platform linux/amd64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
+ # On amd64
+ docker run  --platform linux/amd64 -e "MONGOURI=mongodb://<YOUR_IP>:27017/donation?retryWrites=true&w=majority" -p 8080:8080 -d --name hackathon cagip/hackathon-api:dev
 
 ```
 
@@ -83,11 +83,25 @@ curl --request GET \
     --header 'Content-Type: application/json'
 ```
 
-
 To get all donation
 
 ```bash
 curl --request GET \
     --url 'http://localhost:8080/donations' \
+    --header 'Content-Type: application/json'
+```
+
+To get all donation with parameters, you can use
+
+```
+sortBy=amout,hash,pdfRef,donatorName,pdfSize 
+itemsPerPage=10,100 ...
+sortDesc=1,-1
+page=1,2,3 ...
+```
+
+```bash
+curl --request GET \
+    --url 'http://localhost:8080/donations?sortBy=amount&sortDesc=1&page=1&itemsPerPage=20' \
     --header 'Content-Type: application/json'
 ```
