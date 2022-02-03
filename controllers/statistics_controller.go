@@ -27,6 +27,8 @@ func SumDonationsByMoney() gin.HandlerFunc {
 		groupStage := bson.D{{"$group", bson.D{{"_id", "$moneyType"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
 
 		resultCursor, err := statsCollection.Aggregate(ctx, mongo.Pipeline{ /*matchStage,*/ groupStage})
+		count, err := statsCollection.CountDocuments(ctx, bson.M{})
+
 		if err != nil {
 			println(err)
 		}
@@ -47,6 +49,7 @@ func SumDonationsByMoney() gin.HandlerFunc {
 		type StatResponse struct {
 			Stats []models.Statistics `json:"stats,omitempty"`
 			Total float64             `json:"total,omitempty"`
+			Count int64               `json:"count,omitempty"`
 		}
 
 		if err != nil {
@@ -57,6 +60,7 @@ func SumDonationsByMoney() gin.HandlerFunc {
 		c.JSON(http.StatusOK, StatResponse{
 			Stats: resultData,
 			Total: total,
+			Count: count,
 		})
 
 	}
