@@ -17,7 +17,7 @@ import (
 //https://www.mongodb.com/blog/post/quick-start-golang--mongodb--data-aggregation-pipeline
 
 var statsCollection = configs.GetCollection(configs.DB, "donations")
-var queryCache = cache.New(1*time.Minute, 2*time.Minute)
+var queryCache = cache.New(5*time.Minute, 15*time.Minute)
 
 func SumDonationsByMoney() gin.HandlerFunc {
 	return func(c *gin.Context) {
