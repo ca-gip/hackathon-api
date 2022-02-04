@@ -209,7 +209,7 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 			Sort:  bson.D{{sortBy, sortDesc}},
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		var Donations = make([]models.Donation, 0)
 		defer cancel()
 
@@ -243,7 +243,7 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 		}
 
 		data := responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": Donations, "total": count}}
-		queryCache.Set(c.Request.RequestURI, data, 30*time.Second)
+		queryCache.Set(c.Request.RequestURI, data, 60*time.Second)
 		c.JSON(http.StatusOK, data)
 	}
 }
