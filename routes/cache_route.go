@@ -7,6 +7,5 @@ import (
 )
 
 func CacheRoute(router *gin.Engine) {
-	router.GET("/cache/items", controllers.CacheContent())
-	router.GET("/cache/keys", controllers.CacheKeys())
+	router.GET("/cache", controllers.CacheContent())
 }

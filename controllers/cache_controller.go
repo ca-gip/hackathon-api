@@ -15,15 +15,3 @@ func CacheContent() gin.HandlerFunc {
 	}
 
 }
-
-func CacheKeys() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		keys := make([]string, 0)
-		for key, _ := range queryCache.Items() {
-			keys = append(keys, key)
-		}
-		c.JSON(http.StatusOK, keys)
-
-	}
-
-}
