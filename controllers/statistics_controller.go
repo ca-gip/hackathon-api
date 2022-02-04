@@ -20,14 +20,12 @@ var statsCollection = configs.GetCollection(configs.DB, "donations")
 func SumDonationsByMoney() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		//money := c.Param("money")
 		defer cancel()
 
-		//matchStage := bson.D{{"$match", bson.D{{"moneyType", money}}}}
 		groupStage := bson.D{{"$group", bson.D{{"_id", "$moneyType"}, {"total", bson.D{{"$sum", "$amount"}}}}}}
-
 		resultCursor, err := statsCollection.Aggregate(ctx, mongo.Pipeline{ /*matchStage,*/ groupStage})
 		count, err := statsCollection.CountDocuments(ctx, bson.M{})
+		defer resultCursor.Close(ctx)
 
 		if err != nil {
 			println(err)
@@ -35,7 +33,6 @@ func SumDonationsByMoney() gin.HandlerFunc {
 
 		var resultData []models.Statistics
 		resultCursor.All(ctx, resultData)
-		defer resultCursor.Close(ctx)
 
 		if err = resultCursor.All(ctx, &resultData); err != nil {
 			panic(err)
