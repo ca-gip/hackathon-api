@@ -21,7 +21,7 @@ var queryCache = cache.New(1*time.Minute, 2*time.Minute)
 
 func SumDonationsByMoney() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		stats, found := queryCache.Get("stats")
