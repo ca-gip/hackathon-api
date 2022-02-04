@@ -213,18 +213,24 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 		var Donations = make([]models.Donation, 0)
 		defer cancel()
 
-		likeFilter := bson.M{
-			"$regex": primitive.Regex{
-				Pattern: "^.*" + searchTerm + ".*",
-				Options: "i",
-			},
-		}
+		// No search term
+		var pipeline = bson.D{}
 
-		pipeline := bson.D{
-			{"$or", []interface{}{
-				bson.D{{"donatorName", likeFilter}},
-				bson.D{{"pdfRef", likeFilter}},
-			}},
+		if len(searchTerm) > 0 {
+			likeFilter := bson.M{
+				"$regex": primitive.Regex{
+					Pattern: "^.*" + searchTerm + ".*",
+					Options: "i",
+				},
+			}
+
+			pipeline = bson.D{
+				{"$or", []interface{}{
+					bson.D{{"donatorName", likeFilter}},
+					bson.D{{"pdfRef", likeFilter}},
+				}},
+			}
+
 		}
 
 		results, err := donationCollection.Find(ctx, pipeline, &findOptions)
