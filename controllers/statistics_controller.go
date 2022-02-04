@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"hackathon-api/configs"
 	"hackathon-api/models"
@@ -28,14 +29,18 @@ func SumDonationsByMoney() gin.HandlerFunc {
 		defer resultCursor.Close(ctx)
 
 		if err != nil {
-			println(err)
+			log.Err(err)
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+
 		}
 
 		var resultData []models.Statistics
-		resultCursor.All(ctx, resultData)
 
 		if err = resultCursor.All(ctx, &resultData); err != nil {
-			panic(err)
+			log.Err(err)
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 
 		var total float64 = 0
