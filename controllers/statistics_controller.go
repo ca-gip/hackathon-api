@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/patrickmn/go-cache"
 	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,7 +16,6 @@ import (
 //https://www.mongodb.com/blog/post/quick-start-golang--mongodb--data-aggregation-pipeline
 
 var statsCollection = configs.GetCollection(configs.DB, "donations")
-var queryCache = cache.New(5*time.Minute, 15*time.Minute)
 
 func SumDonationsByMoney() gin.HandlerFunc {
 	return func(c *gin.Context) {
