@@ -223,7 +223,7 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 		count, err := donationCollection.CountDocuments(ctx, pipeline)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
 
