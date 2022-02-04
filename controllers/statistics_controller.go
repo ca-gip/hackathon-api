@@ -35,6 +35,7 @@ func SumDonationsByMoney() gin.HandlerFunc {
 
 		var resultData []models.Statistics
 		resultCursor.All(ctx, resultData)
+		defer resultCursor.Close(ctx)
 
 		if err = resultCursor.All(ctx, &resultData); err != nil {
 			panic(err)
