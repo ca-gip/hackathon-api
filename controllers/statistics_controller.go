@@ -27,7 +27,7 @@ func SumDonationsByMoney() gin.HandlerFunc {
 		stats, found := queryCache.Get("stats")
 
 		if found {
-			c.JSON(http.StatusOK, stats)
+			c.JSON(http.StatusNotModified, stats)
 			return
 		}
 
