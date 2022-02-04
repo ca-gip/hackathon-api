@@ -195,6 +195,13 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 			return
 		}
 
+		donations, found := queryCache.Get(c.Request.RequestURI)
+
+		if found {
+			c.JSON(http.StatusFound, donations)
+			return
+		}
+
 		skipItems := itemsPerPage * (page - 1)
 		findOptions := options.FindOptions{
 			Limit: &itemsPerPage,
@@ -235,9 +242,9 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK,
-			responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": Donations, "total": count}},
-		)
+		data := responses.DonationResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": Donations, "total": count}}
+		queryCache.Set(c.Request.RequestURI, data, 30*time.Second)
+		c.JSON(http.StatusOK, data)
 	}
 }
 

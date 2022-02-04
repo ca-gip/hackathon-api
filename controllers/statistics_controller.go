@@ -17,14 +17,14 @@ import (
 //https://www.mongodb.com/blog/post/quick-start-golang--mongodb--data-aggregation-pipeline
 
 var statsCollection = configs.GetCollection(configs.DB, "donations")
-var statsCache = cache.New(1*time.Minute, 2*time.Minute)
+var queryCache = cache.New(1*time.Minute, 2*time.Minute)
 
 func SumDonationsByMoney() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		stats, found := statsCache.Get("stats")
+		stats, found := queryCache.Get("stats")
 
 		if found {
 			c.JSON(http.StatusFound, stats)
@@ -67,7 +67,7 @@ func SumDonationsByMoney() gin.HandlerFunc {
 			return
 		}
 
-		statsCache.Set("stats", StatResponse{
+		queryCache.Set("stats", StatResponse{
 			Stats: resultData,
 			Total: total,
 			Count: count,
