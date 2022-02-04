@@ -41,10 +41,6 @@ func SumDonationsByMoney() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
-		errcursor := resultCursor.Close(ctx)
-		if errcursor != nil {
-			log.Err(err)
-		}
 
 		var total float64 = 0
 		for i, stat := range resultData {

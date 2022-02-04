@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"hackathon-api/configs"
 	"hackathon-api/models"
@@ -228,13 +229,10 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 		}
 
 		//reading from the db in an optimal way
-		defer results.Close(ctx)
-		for results.Next(ctx) {
-			var singleDonation models.Donation
-			if err = results.Decode(&singleDonation); err != nil {
-				c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
-			}
-			Donations = append(Donations, singleDonation)
+		if err = results.All(ctx, &Donations); err != nil {
+			log.Err(err)
+			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 
 		c.JSON(http.StatusOK,
