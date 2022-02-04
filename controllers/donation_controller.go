@@ -198,7 +198,7 @@ func GetAllDonationsPaginated() gin.HandlerFunc {
 		donations, found := queryCache.Get(c.Request.RequestURI)
 
 		if found {
-			c.JSON(http.StatusNotModified, donations)
+			c.JSON(http.StatusOK, donations)
 			return
 		}
 
