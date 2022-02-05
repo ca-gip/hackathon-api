@@ -44,13 +44,13 @@ func CreateDonation() gin.HandlerFunc {
 
 		// Validate MoneyType
 		if err := utils.ValidateMoneyType(donation.MoneyType); err != nil {
-			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusNotAcceptable, responses.DonationResponse{Status: http.StatusNotAcceptable, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
 			return
 		}
 
 		// Validate minmum amount
 		if donation.Amount <= 0.0001 {
-			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": "amount must be equals or superior to 0.0001"}})
+			c.JSON(http.StatusBadRequest, responses.DonationResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": "amount must be equals or superior to 0.0001"}})
 			return
 		}
 
@@ -70,7 +70,7 @@ func CreateDonation() gin.HandlerFunc {
 		}
 
 		if count >= 1 {
-			c.JSON(http.StatusInternalServerError, responses.DonationResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": fmt.Sprintf("donor name with %s currency already existing in database", donation.MoneyType)}})
+			c.JSON(http.StatusConflict, responses.DonationResponse{Status: http.StatusConflict, Message: "error", Data: map[string]interface{}{"data": fmt.Sprintf("donor name with %s currency already existing in database", donation.MoneyType)}})
 			return
 		}
 
